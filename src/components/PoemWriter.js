@@ -13,7 +13,7 @@ class PoemWriter extends React.Component {
   thirdLine5Words=(string)=>{if(string){return string.trim().split(" ").length ===5} else return false}//   The third line has five words.
   errorOff=(valid)=>{
     if(valid){  this.setState({error: ""})}
-    else{  this.setState({error: "This poem is not written in the right structure!"})}
+    else{  this.setState({error: '<div id="poem-validation-error" style={{ color: "red" }}>This poem is not written in the right structure!</div>'})}
   }
   handleInputChange = (event)=>{
     // console.log(event.target.value);
@@ -51,9 +51,9 @@ class PoemWriter extends React.Component {
     return (
       <div>
         <textarea rows="3" cols="60" value={this.state.text} onChange={this.handleInputChange}/>
-        <div id="poem-validation-error" style={{ color: "red" }}>
+
           {this.state.error}
-        </div>
+
       </div>
     );
   }
