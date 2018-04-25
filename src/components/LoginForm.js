@@ -1,26 +1,41 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 class LoginForm extends React.Component {
-  constructor(props) {
-    super(props);     //this.props.onSubmit //gets called when the form is being submitted.
-
+  // constructor(props) {
+  constructor() {
+    // super(props);     //this.props.onSubmit //gets called when the form is being submitted.
+    super();     //this.props.onSubmit //gets called when the form is being submitted.
     this.state = {username: "", password: ""};
   }
   // handleInputChange = (event)=>{
   handleChangeUsername = (event)=>{
     // console.log("Hi");
     // console.log(event.target.value);
-    this.setState({username: event.target.value},()=>{    console.log(this.state.username);})
+    // this.setState({username: event.target.value},()=>{    console.log(this.state.username);})
+    this.setState({username: event.target.value})
   }
   handleChangePassword = (event)=>{
-    this.setState({password: event.target.value},()=>{console.log(this.state.password + "::" + this.state.username);})
+    // this.setState({password: event.target.value},()=>{console.log(this.state.password + "::" + this.state.username);})
+    this.setState({password: event.target.value})
   }
-  handleSubmit = (event)=>{
-    event.preventDefault()
+  // handleSubmit = (event)=>{
+  handleFormSubmit = event => {
+  // handleFormSubmit = (event)=>{
+    // event.preventDefault()
+    event.preventDefault();
+    let username = this.state.username
+    let password = this.state.password
     // console.log(this.state.password.length);
-    if(this.state.password.length > 0 && this.state.username.length > 0)
+    // if(this.state.password.length > 0 && this.state.username.length > 0)
+    if(password.length > 0 && username.length > 0)
+    // if(!this.state.username || !this.state.password)
     {
-      this.props.onSubmit(this.state.username,this.state.password)
+    // if (!username || !password) {
+
+      // this.props.onSubmit(this.state.username,this.state.password)
+      // this.props.onSubmit({this.state.username,this.state.password})
+      this.props.onSubmit({username,password})
     }
   }
   // // You'll find two inputs in this component:
@@ -40,7 +55,8 @@ class LoginForm extends React.Component {
 
   render() {
     return (
-      <form>
+      <form onSubmit={this.handleFormSubmit}>
+
         <div>
           <label>
             Username
@@ -54,7 +70,10 @@ class LoginForm extends React.Component {
           </label>
         </div>
         <div>
-          <button type="submit" onClick={this.handleSubmit}>Log in</button>
+        {/*
+          // <button type="submit" onClick=this.handleFormSubmit}>Log in</button>
+          */}
+          <button type="submit">Log in</button>
         </div>
       </form>
     );
