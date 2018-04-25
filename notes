@@ -1,0 +1,333 @@
+
+Graham lecture 4/24
+
+arrow function maintains the execution context it was defined with
+that is why we use it in react to maintain state
+  Alternative
+construct(){super();this.timesClicked = this.timesClicked.bind(this)}   //arrow is easier
+if want console.log after state change, use a callback
+
+props moves down
+state probably moves up, but stays at where it was created
+
+//////////////
+Steve lecture:  4/24
+props : go from parent to child
+the way data strcutured implies how the component will be strcutured
+      //App -> image->content[]//comments here tied to image.
+create-react-app nameoffolder, likes rails new\
+npm install -g yarn   //yarn wrapper for npm, except it caches unlike npm
+
+index.js    render app, index is mostly for  config
+registerserviceworker : for progressive web apps: not for us.
+error jsx not defined   you didnt import react into file
+
+assign data from one component to different component
+<paintingDetails {...paintingData} <- sprad the data from paintingData to send to paintingDetails
+
+functional component  (different from class component)
+  const COmmentList= (props)=>{
+    console.log(props)  //not this.props , isnt a class component
+    return (
+      <div>Comment</div>
+    )
+  }
+export default CommentList
+//new file
+import CommentList from 'commentlist.js'
+render(){return(<CommentList />)}           //how we use commentlist in comment.js
+
+how to initialize class?    call it in a render. there is no "new" like in JS
+super()                     inherits from react. calls the constructor that it is inheriting from
+                            always have a super in your constructor
+setState changes               trigger rerender implcictly
+  state = {liked:false}
+  this.state.liked = !this.state.liked //doesnt call render
+  likePainting = (event)               //calls render!
+    =>{this.setState({like: !this.state.liked})} //toggle
+
+
+
+
+////////////////////////////////////////State
+State is basically data that is mutated in your component
+ while a component can't change its own props, it can change its state.
+State is used to handle several things in your component:
+ Interactivity (e.g. changing data when a user clicks a button)
+ Fetching remote data (remote data is, by definition, not available right away when the component is mounted —
+  state gives us a way of updating the component once that data arrives)
+ Reacting to the passing of time (i.e. setting an interval or timeout)
+
+ State vs Prop
+ The best way to figure out if data should go in props or state is to ask ourselves 'Will this data ever change?'.
+  If not, it's a prop. If it will, it should go in state!
+
+
+ follow along by running npm install && npm start in your terminal.
+
+ example:
+  A toggle button has an on and off state. Using props for that value wouldn't work, since we can't actually change our props!
+  /////// state example:
+  // src/components/ToggleButton.js
+  import React from 'react';
+    class ToggleButton extends React.Component {
+    constructor() {
+      super();
+      this.state = { isEnabled: false     }
+    }
+    render() {
+      return (
+        <button className="toggle-button">
+          I am toggled {this.state.isEnabled ? 'on' : 'off'}
+        </button>
+      )    }  }
+  export default ToggleButton;
+  // src/components/Address.js
+  import React from 'react';
+  class Address extends React.Component {
+    constructor(props){
+      super(props);
+      this.state = { fullAddress: `${props.street},${props.city}`}
+    }
+    render(){
+      return(
+        <div className="address">
+          {/* { this.state.fullAddress}  below is better than this */}
+          {this.props.street}, {this.props.city}
+        </div>
+      );    }  }//class
+  export default Address;
+  // src/index.js
+  import React from 'react';
+  import ReactDOM from 'react-dom';
+  import ToggleButton from './components/ToggleButton'
+  import Address from './components/Address'
+  ReactDOM.render(
+    // <div>Components Need To Be Mounted</div>,
+    <div>
+      <ToggleButton />
+      <Address
+        street="Santa Monica Blvd."
+        city="Santa Monica"
+      />
+    </div>
+    ,
+    document.getElementById('root')
+  )
+///////////////////////////Event System
+
+SyntheticEvent React has its own event system with special event handlers
+ The reason for having a specific event system instead of using native events is cross-browser compatibilit
+Events : https://facebook.github.io/react/docs/events.html#supported-events
+event.target            get the target of an event
+event.preventDefault()  prevent a default action
+Event pooling           whenever an event fires, its event data (an object) is sent to the callback.
+                       the event object is in effect being sent back to the pool for use in a later event.
+                        means wthat when you inspect the properties become null
+persist event pool
+                      store the data you need in a variable (e.g. const target = event.target),
+                      make the event persistent by calling that method: event.persist().
+//////Example: event
+class Tickler extends React.Component {
+  tickle = () => {    console.log('Tee hee!');  }
+  render() {
+    return (
+      <button>Tickle me!</button>                       //no event
+      <button onClick={this.tickle}>Tickle me!</button> //event
+    );  }}
+//////////// more events
+import React from 'react';
+class CoordinatesButton extends React.Component {
+  handleClick = (event) => {
+    this.props.onReceiveCoordinates([event.clientX, event.clientY]);
+  }
+  render() {
+    return (
+      <button onClick={this.handleClick}>Coords</button>
+    );
+  }
+}
+export default CoordinatesButton
+/////////more events 2
+import React from 'react';
+class DelayedButton extends React.Component {
+  handleClick = (event) => {
+    event.persist();
+    setTimeout(() => {
+      this.props.onDelayedClick(event);
+    }, this.props.delay);
+  }
+  render() {
+    return (
+      <button onClick={this.handleClick}>Delayed</button>
+    );
+  }
+}
+export default DelayedButton
+/////////////////////
+this.setState()   Instead of directly modifying the state using this.state, we use .
+                  it only merges things on the first level.
+                  It merged the state, but any objects get overwritten, because it doesn't deeply merge the state
+                  solve this using Object.assign()
+                    this.setState({
+                      addressInfo: Object.assign({}, this.state.addressInfo, {
+                        city: 'New York City',
+                      }),
+                    });
+                    BETTER VERION
+                    this.setState({
+                      addressInfo: {
+                        ...this.state.addressInfo,
+                        city: 'New York City',
+                      },
+                    });
+setting state is not synchronous.
+///////////////////////////////update object inside object
+import React from 'react';
+
+class YouTubeDebugger extends React.Component {
+  constructor() {
+    super();
+
+    this.state = {
+      errors: [],
+      user: null,
+      settings: {
+        bitrate: 8,
+        video: {
+          resolution: '1080p'
+        }
+      }
+    };
+  }
+
+  handleChangeBitrate = () => {
+    this.setState({
+      settings: Object.assign({}, this.state.settings, {
+        bitrate: 12
+      }),
+    });
+  }
+
+  handleChangeResolution = () => {
+    this.setState({
+      settings: Object.assign({}, this.state.settings, {
+        video: Object.assign({}, this.state.settings.video, {
+          resolution: '720p'
+        })
+      }),
+    });
+
+    /*
+      Or this can be defined as
+      this.setState({
+        settings: {
+          ...this.state.settings,
+          video: {
+            ...this.state.settings.video,
+            resolution: '720p'
+          }
+        },
+      });
+    */
+  }
+
+  render() {
+    return (
+      <div>
+        <button
+          className="bitrate"
+          onClick={this.handleChangeBitrate}
+        >
+          Change bitrate
+        </button>
+        <button
+          className="resolution"
+          onClick={this.handleChangeResolution}
+        >
+          Change resolution
+        </button>
+      </div>
+    );
+  }
+}
+
+export default YouTubeDebugger;
+/////////////////////////////////increment data
+import React from 'react';
+
+class DigitalClicker extends React.Component {
+  constructor() {
+    super();
+
+    this.state = {
+      timesClicked: 0,
+    };
+  }
+
+  handleClick = () => {
+    this.setState({
+      timesClicked: ++this.state.timesClicked,
+    });
+  }
+
+  render() {
+    return (
+      <button onClick={this.handleClick}>{this.state.timesClicked}</button>
+    );
+  }
+}
+
+export default DigitalClicker;
+///////////////////FORMS notes react
+To control the value of these inputs, we use a prop specific to that type of input:
+For <input> and <textarea>, we use value
+For <input type="checkbox"> and <input type="radio">, we use checked
+For <option>, we use selected
+To listen for changes to the value of an input, we simply pass in the onChange prop with a callback function.
+If the component has a value prop, it is controlled (the state of the component is being controlled by React). If it doesn't have a value prop, it's an uncontrolled component. Uncontrolled components can optionally have a defaultValue prop to set its initial value.
+In uncontrolled components, the state of the component's value is kept in the DOM itself
+In controlled components, we explicitly set the value of a component, and update that value in response to any changes the user makes to the value of that component.
+/////////////////controlled component example
+// src/components/ControlledInput.js
+import React from 'react';
+
+class ControlledInput extends React.Component {
+  constructor() {
+    super();
+
+    this.state = {
+      value: '',
+    };
+  }
+
+  handleChange = event => {
+    this.setState({
+      value: event.target.value,
+    });
+  }
+
+  render() {
+    return (
+      <input
+        type="text"
+        value={this.state.value}
+        onChange={this.handleChange}
+      />
+    );
+  }
+}
+
+export default ControlledInput;
+
+
+// src/index.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+import ControlledInput from './components/ControlledInput';
+
+ReactDOM.render(
+  <ControlledInput />,
+  document.getElementById('root')
+);
